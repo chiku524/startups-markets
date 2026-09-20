@@ -13,7 +13,10 @@ if (typeof window !== "undefined") {
 }
 
 export function WalletProviders({ children }: { children: React.ReactNode }) {
-  const endpoint = useMemo(() => SOLANA_RPC, []);
+  const endpoint = useMemo(
+    () => (SOLANA_RPC.startsWith("http") ? SOLANA_RPC : "https://api.devnet.solana.com"),
+    [],
+  );
   const wallets = useMemo(() => [], []);
 
   return (
