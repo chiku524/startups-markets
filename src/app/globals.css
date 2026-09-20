@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07110c;
+  --foreground: #f4f7f2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-fraunces);
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.wallet-adapter-button {
+  background: #b8ff4f !important;
+  color: #07110c !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: #b8ff4f !important;
+}
