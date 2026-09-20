@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { allMarkets, verifyAndCreateListing } from "@/lib/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  return NextResponse.json({ markets: allMarkets() });
+  const markets = await allMarkets();
+  return NextResponse.json({ markets });
 }
 
 export async function POST(request: Request) {
@@ -17,6 +20,7 @@ export async function POST(request: Request) {
       question?: string;
       listingTx?: string;
       listedBy?: string;
+      slug?: string;
     };
 
     if (
@@ -43,6 +47,7 @@ export async function POST(request: Request) {
       question: body.question ?? "",
       listingTx: body.listingTx,
       listedBy: body.listedBy,
+      slug: body.slug,
     });
 
     return NextResponse.json({ market });

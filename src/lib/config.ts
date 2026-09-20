@@ -30,6 +30,13 @@ export function hasTreasuryConfigured(): boolean {
   return TREASURY_ADDRESS.length >= 32;
 }
 
+export function explorerTxUrl(signature: string): string {
+  const cluster = SOLANA_NETWORK === "mainnet-beta" ? "" : `?cluster=${SOLANA_NETWORK}`;
+  return `https://explorer.solana.com/tx/${signature}${cluster}`;
+}
+
+export const SOLANA_FAUCET_URL = "https://faucet.solana.com";
+
 /** Server-only Helius URL. Never expose HELIUS_API_KEY with a NEXT_PUBLIC_ prefix. */
 export function getServerRpcUrl(): string {
   const heliusKey = envString("HELIUS_API_KEY");

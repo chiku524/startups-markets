@@ -52,9 +52,17 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {featured.map((market) => (
-            <MarketCard key={market.slug} market={market} />
-          ))}
+          {featured.length === 0 ? (
+            <p className="text-white/50">
+              No live markets yet.{" "}
+              <Link href="/list" className="text-[#b8ff4f]">
+                List a startup for {LISTING_FEE_SOL} SOL
+              </Link>{" "}
+              to publish the first on-chain market.
+            </p>
+          ) : (
+            featured.map((market) => <MarketCard key={market.slug} market={market} />)
+          )}
         </div>
       </section>
     </div>

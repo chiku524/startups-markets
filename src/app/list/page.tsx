@@ -1,5 +1,5 @@
 import { ListStartupForm } from "@/components/ListStartupForm";
-import { LISTING_FEE_SOL } from "@/lib/config";
+import { SOLANA_FAUCET_URL, LISTING_FEE_SOL } from "@/lib/config";
 
 export default function ListPage() {
   return (
@@ -13,9 +13,16 @@ export default function ListPage() {
           favor, they split the opposing side.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-white/70">
-          <li>Connect a Solana wallet.</li>
+          <li>Connect a Solana wallet and switch it to Devnet.</li>
+          <li>
+            Get test SOL from the{" "}
+            <a className="text-[#b8ff4f] underline" href={SOLANA_FAUCET_URL} target="_blank" rel="noreferrer">
+              Solana faucet
+            </a>{" "}
+            if your balance is empty.
+          </li>
           <li>Send {LISTING_FEE_SOL} SOL to the startups.markets treasury.</li>
-          <li>Your company appears as a live prediction market.</li>
+          <li>Your company appears as a live prediction market after the transfer confirms.</li>
         </ul>
       </div>
       <ListStartupForm />

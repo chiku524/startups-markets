@@ -37,4 +37,5 @@ export type ListingPayload = {
   question: string;
   listingTx: string;
   listedBy: string;
+  slug?: string;
 };

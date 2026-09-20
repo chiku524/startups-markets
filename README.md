@@ -24,9 +24,9 @@ NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
 
 ## Product rules
 
-- Listing a startup sends **0.1 SOL** to the treasury. The API checks the on-chain transfer before the market goes live.
-- Betting is a parimutuel YES/NO pool. Deposits go to the same treasury and are recorded against the market.
-- Seed markets ship with the app so the board is not empty on first load.
+- Listing a startup sends **0.1 SOL** to the treasury on Devnet, with a memo the app uses to rebuild the market.
+- Betting is a parimutuel YES/NO pool. Deposits are the same kind of confirmed SOL transfer.
+- The board starts empty. Only on-chain listings appear.
 
 ## Deploy
 

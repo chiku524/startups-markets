@@ -2,10 +2,20 @@
 
 import Link from "next/link";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { SOLANA_FAUCET_URL, SOLANA_NETWORK } from "@/lib/config";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-[#07110c]/80 backdrop-blur-xl">
+      {SOLANA_NETWORK !== "mainnet-beta" ? (
+        <div className="bg-[#b8ff4f] px-4 py-1.5 text-center text-xs font-medium text-[#07110c]">
+          Solana Devnet — set your wallet to Devnet and fund it from the{" "}
+          <a className="underline" href={SOLANA_FAUCET_URL} target="_blank" rel="noreferrer">
+            faucet
+          </a>
+          .
+        </div>
+      ) : null}
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-md bg-[#b8ff4f] font-serif text-lg font-semibold text-[#07110c]">

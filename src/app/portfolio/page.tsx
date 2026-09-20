@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useMarkets } from "@/components/useMarkets";
+import { explorerTxUrl } from "@/lib/config";
 import { formatSol, sideLabel } from "@/lib/markets";
 import type { Position } from "@/lib/types";
 
@@ -22,7 +23,7 @@ export default function PortfolioPage() {
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <h1 className="font-serif text-4xl">Portfolio</h1>
       <p className="mt-3 text-white/65">
-        Positions from this browser after you deposit SOL into a market.
+        Positions from this browser after a confirmed Devnet deposit.
       </p>
       {positions.length === 0 ? (
         <p className="mt-8 text-white/50">No deposits yet.</p>
@@ -43,7 +44,15 @@ export default function PortfolioPage() {
                       {sideLabel(position.side)} · {formatSol(position.amountSol)}
                     </p>
                   </div>
-                  <p className="text-xs text-white/35">{position.txSignature.slice(0, 8)}…</p>
+                  <a
+                    className="text-xs text-white/35 underline"
+                    href={explorerTxUrl(position.txSignature)}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {position.txSignature.slice(0, 8)}…
+                  </a>
                 </div>
               </Link>
             );

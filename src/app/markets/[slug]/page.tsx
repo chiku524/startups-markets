@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { explorerTxUrl } from "@/lib/config";
 import { TradePanel } from "@/components/TradePanel";
 import { useMarkets } from "@/components/useMarkets";
 import { formatPercent, formatSol, impliedProbability, statusLabel } from "@/lib/markets";
@@ -69,6 +70,21 @@ export default function MarketDetailPage() {
             <dt className="text-white/40">Listed</dt>
             <dd className="mt-1">{new Date(market.listedAt).toLocaleDateString()}</dd>
           </div>
+          {market.listingTx ? (
+            <div className="sm:col-span-2">
+              <dt className="text-white/40">Listing transaction</dt>
+              <dd className="mt-1">
+                <a
+                  className="break-all text-[#b8ff4f] underline"
+                  href={explorerTxUrl(market.listingTx)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {market.listingTx}
+                </a>
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </article>
       <TradePanel market={market} onMarketChange={setMarket} />

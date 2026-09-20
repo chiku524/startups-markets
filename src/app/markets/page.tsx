@@ -15,7 +15,11 @@ export default function MarketsPage() {
       </p>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {loading && markets.length === 0 ? (
-          <p className="text-white/50">Loading markets…</p>
+          <p className="text-white/50">Loading markets from Devnet…</p>
+        ) : markets.length === 0 ? (
+          <p className="text-white/50">
+            No companies are listed yet. Open a market by paying 0.1 SOL on Devnet.
+          </p>
         ) : (
           markets.map((market) => <MarketCard key={market.slug} market={market} />)
         )}

@@ -3,20 +3,11 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { LISTING_FEE_SOL, hasTreasuryConfigured } from "@/lib/config";
-import { buildSolTransfer, listingFeeLamports } from "@/lib/solana";
+import { LISTING_FEE_SOL, SOLANA_NETWORK, hasTreasuryConfigured } from "@/lib/config";
+import { buildListingMemo, listingSlug } from "@/lib/onchain";
+import { DEVNET_GENESIS } from "@/lib/ids";
+import { buildSolTransfer, listingFeeLamports, sendAndConfirmTransfer } from "@/lib/solana";
 import type { StartupMarket } from "@/lib/types";
-
-const LOCAL_LISTINGS_KEY = "startups.markets.listings";
-
-function saveLocalListing(market: StartupMarket) {
-  try {
-    const current = JSON.parse(localStorage.getItem(LOCAL_LISTINGS_KEY) ?? "[]") as StartupMarket[];
-    localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify([market, ...current]));
-  } catch {
-    localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify([market]));
-  }
-}
 
 export function ListStartupForm() {
   const router = useRouter();
@@ -49,30 +40,50 @@ export function ListStartupForm() {
       return;
     }
     setBusy(true);
-    setStatus("Confirm 0.1 SOL listing fee in your wallet…");
+    setStatus("Checking Devnet connection…");
     try {
+      if (SOLANA_NETWORK === "devnet") {
+        const genesis = await connection.getGenesisHash();
+        if (genesis !== DEVNET_GENESIS) {
+          throw new Error("This app is on Solana Devnet. Switch the RPC/wallet to Devnet and retry.");
+        }
+      }
+      const listedBy = publicKey.toBase58();
+      const slug = listingSlug(form.name, listedBy);
+      const memo = buildListingMemo({
+        ...form,
+        slug,
+        listingTx: "",
+        listedBy,
+      });
+      setStatus("Confirm 0.1 SOL listing fee in your wallet…");
       const transaction = await buildSolTransfer({
         from: publicKey,
         lamports: listingFeeLamports(),
+        memo,
+        connection,
       });
-      const listingTx = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(listingTx, "confirmed");
-      setStatus("Verifying the listing payment on Solana…");
+      const listingTx = await sendAndConfirmTransfer({
+        transaction,
+        connection,
+        sendTransaction,
+      });
+      setStatus("Confirming the listing payment on Devnet…");
       const response = await fetch("/api/markets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          slug,
           listingTx,
-          listedBy: publicKey.toBase58(),
+          listedBy,
         }),
       });
       const payload = (await response.json()) as { market?: StartupMarket; error?: string };
       if (!response.ok || !payload.market) {
         throw new Error(payload.error ?? "Listing verification failed.");
       }
-      saveLocalListing(payload.market);
-      setStatus("Listed. Opening your market…");
+      setStatus("Listed on-chain. Opening your market…");
       router.push(`/markets/${payload.market.slug}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Listing failed.");
@@ -119,6 +130,7 @@ export function ListStartupForm() {
         Why this company might succeed
         <textarea
           required
+          maxLength={280}
           rows={5}
           value={form.description}
           onChange={(event) => update("description", event.target.value)}

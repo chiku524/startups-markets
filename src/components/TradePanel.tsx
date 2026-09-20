@@ -2,9 +2,11 @@
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useMemo, useState } from "react";
-import { MIN_DEPOSIT_SOL } from "@/lib/config";
+import { explorerTxUrl, MIN_DEPOSIT_SOL, SOLANA_NETWORK } from "@/lib/config";
 import { formatSol, payoutPreview, sideLabel } from "@/lib/markets";
-import { buildSolTransfer, depositLamports } from "@/lib/solana";
+import { buildDepositMemo } from "@/lib/onchain";
+import { DEVNET_GENESIS } from "@/lib/ids";
+import { buildSolTransfer, depositLamports, sendAndConfirmTransfer } from "@/lib/solana";
 import type { MarketSide, Position, StartupMarket } from "@/lib/types";
 
 const POSITIONS_KEY = "startups.markets.positions";
@@ -36,6 +38,7 @@ export function TradePanel({
   const [side, setSide] = useState<MarketSide>("yes");
   const [amount, setAmount] = useState("0.1");
   const [status, setStatus] = useState<string | null>(null);
+  const [lastTx, setLastTx] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const amountSol = Number(amount) || 0;
   const preview = useMemo(
@@ -53,19 +56,33 @@ export function TradePanel({
       return;
     }
     setBusy(true);
-    setStatus("Confirm the deposit in your wallet…");
+    setLastTx(null);
+    setStatus("Checking Devnet connection…");
     try {
+      if (SOLANA_NETWORK === "devnet") {
+        const genesis = await connection.getGenesisHash();
+        if (genesis !== DEVNET_GENESIS) {
+          throw new Error("This app is on Solana Devnet. Switch the RPC/wallet to Devnet and retry.");
+        }
+      }
       const lamports = depositLamports(amountSol);
-      const transaction = await buildSolTransfer({ from: publicKey, lamports });
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-      setStatus("Recording your position…");
+      const transaction = await buildSolTransfer({
+        from: publicKey,
+        lamports,
+        memo: buildDepositMemo(market.slug, side),
+        connection,
+      });
+      setStatus("Confirm the deposit in your wallet…");
+      const signature = await sendAndConfirmTransfer({
+        transaction,
+        connection,
+        sendTransaction,
+      });
+      setStatus("Recording your on-chain position…");
       const response = await fetch(`/api/markets/${market.slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          side,
-          amountSol,
           txSignature: signature,
         }),
       });
@@ -82,6 +99,7 @@ export function TradePanel({
       };
       writePositions([next, ...readPositions()]);
       onMarketChange(payload.market);
+      setLastTx(signature);
       setStatus(`Deposited ${formatSol(amountSol)} on ${sideLabel(side)}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Deposit failed.");
@@ -142,9 +160,19 @@ export function TradePanel({
         {connected ? `Deposit on ${sideLabel(side)}` : "Connect wallet to deposit"}
       </button>
       {status ? <p className="mt-3 text-sm text-[#b8ff4f]">{status}</p> : null}
+      {lastTx ? (
+        <a
+          className="mt-2 inline-block text-xs text-white/55 underline"
+          href={explorerTxUrl(lastTx)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View on Solana Explorer
+        </a>
+      ) : null}
       <p className="mt-4 text-xs leading-5 text-white/40">
-        Deposits are SOL transfers to the platform treasury. Positions are tracked against your
-        wallet and the on-chain signature.
+        Deposits are SOL transfers to the platform treasury on Devnet. Pools are rebuilt from those
+        confirmed transactions.
       </p>
     </aside>
   );
