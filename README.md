@@ -14,11 +14,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Set `NEXT_PUBLIC_TREASURY_ADDRESS` to the Solana wallet that should receive listing fees and market deposits. Replace the example address before taking real funds.
 
+Put a Helius key in `HELIUS_API_KEY` (server-only). The app proxies Solana RPC through `/api/solana` so the key is not shipped to the browser.
+
 Default network is **devnet**. Switch to mainnet with:
 
 ```
 NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
-NEXT_PUBLIC_SOLANA_RPC=https://api.mainnet-beta.solana.com
 ```
 
 ## Product rules
@@ -35,4 +36,4 @@ GitHub Actions is not required. Push to GitHub, then:
 npx vercel --prod --yes
 ```
 
-Add the same `NEXT_PUBLIC_*` variables in the Vercel project settings.
+Add `HELIUS_API_KEY` and the `NEXT_PUBLIC_*` variables in the Vercel project settings. Do not prefix the Helius key with `NEXT_PUBLIC_`.

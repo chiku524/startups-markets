@@ -5,10 +5,11 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { LISTING_FEE_LAMPORTS, MIN_DEPOSIT_SOL, SOLANA_RPC, TREASURY_ADDRESS } from "@/lib/config";
+import { getBrowserRpcUrl, getServerRpcUrl, LISTING_FEE_LAMPORTS, MIN_DEPOSIT_SOL, TREASURY_ADDRESS } from "@/lib/config";
 
 export function getConnection(): Connection {
-  return new Connection(SOLANA_RPC, "confirmed");
+  const endpoint = typeof window === "undefined" ? getServerRpcUrl() : getBrowserRpcUrl();
+  return new Connection(endpoint, "confirmed");
 }
 
 export function getTreasuryPublicKey(): PublicKey {

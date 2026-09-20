@@ -1,10 +1,10 @@
 "use client";
 
 import { Buffer } from "buffer";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { SOLANA_RPC } from "@/lib/config";
+import { PUBLIC_CLUSTER_RPC } from "@/lib/config";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -13,11 +13,12 @@ if (typeof window !== "undefined") {
 }
 
 export function WalletProviders({ children }: { children: React.ReactNode }) {
-  const endpoint = useMemo(
-    () => (SOLANA_RPC.startsWith("http") ? SOLANA_RPC : "https://api.devnet.solana.com"),
-    [],
-  );
+  const [endpoint, setEndpoint] = useState(PUBLIC_CLUSTER_RPC);
   const wallets = useMemo(() => [], []);
+
+  useEffect(() => {
+    setEndpoint(`${window.location.origin}/api/solana`);
+  }, []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>

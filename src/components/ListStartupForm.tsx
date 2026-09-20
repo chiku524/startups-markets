@@ -1,10 +1,10 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { LISTING_FEE_SOL, hasTreasuryConfigured } from "@/lib/config";
-import { buildSolTransfer, listingFeeLamports, getConnection } from "@/lib/solana";
+import { buildSolTransfer, listingFeeLamports } from "@/lib/solana";
 import type { StartupMarket } from "@/lib/types";
 
 const LOCAL_LISTINGS_KEY = "startups.markets.listings";
@@ -20,6 +20,7 @@ function saveLocalListing(market: StartupMarket) {
 
 export function ListStartupForm() {
   const router = useRouter();
+  const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -54,7 +55,6 @@ export function ListStartupForm() {
         from: publicKey,
         lamports: listingFeeLamports(),
       });
-      const connection = getConnection();
       const listingTx = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(listingTx, "confirmed");
       setStatus("Verifying the listing payment on Solana…");

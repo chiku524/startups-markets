@@ -1,10 +1,10 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useMemo, useState } from "react";
 import { MIN_DEPOSIT_SOL } from "@/lib/config";
 import { formatSol, payoutPreview, sideLabel } from "@/lib/markets";
-import { buildSolTransfer, depositLamports, getConnection } from "@/lib/solana";
+import { buildSolTransfer, depositLamports } from "@/lib/solana";
 import type { MarketSide, Position, StartupMarket } from "@/lib/types";
 
 const POSITIONS_KEY = "startups.markets.positions";
@@ -31,6 +31,7 @@ export function TradePanel({
   market: StartupMarket;
   onMarketChange: (market: StartupMarket) => void;
 }) {
+  const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const [side, setSide] = useState<MarketSide>("yes");
   const [amount, setAmount] = useState("0.1");
@@ -56,7 +57,6 @@ export function TradePanel({
     try {
       const lamports = depositLamports(amountSol);
       const transaction = await buildSolTransfer({ from: publicKey, lamports });
-      const connection = getConnection();
       const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, "confirmed");
       setStatus("Recording your position…");
